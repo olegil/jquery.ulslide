@@ -1,17 +1,21 @@
 /**
- * When I noticed the growing popularity of JS-Slide and JS-Fade effects I have
- * decide to develop a plugin for jQuery. This plugin will help you to add thise
- * effects to the site in more simple way.
- * Note: If the mousewheel plugin has been included on the page then the slider will
- * also respond to the mouse wheel.
+ * Just another slider (or carousel) that supports «Slide», «Fade», 
+ * «HTML5 Rotate», «HTML5 Scale» and «Carousel» effects. Flexible, 
+ * “secure” for layout (do not breaks structure of HTML) and very simple to use.
+ * 
+ * Any HTML can be used as slide content (not only images). 
+ * Also the plugin supports pre-loading, lazy-loading and ajax-loading.
+ * 
+ * If the mousewheel plugin has been included on the page then 
+ * the slider will also respond to the mouse wheel. 
  *
  * @name jQuery ulSlide plugin
  * @license GPL
  * @version 1.4.9
  * @date April 1th, 2013
  * @category jQuery plugin
- * @author Kotelnitskiy Evgeniy (evgennniy@gmail.com)
- * @copyright (c) 2012 Kotelnitskiy Evgeniy (http://4coder.info/en/)
+ * @author Yevhen Kotelnytskyi (evgennniy@gmail.com)
+ * @copyright (c) 2012 Yevhen Kotelnytskyi (http://4coder.info/en/)
  * @example Visit http://4coder.info/en/code/jquery-plugins/ulslide/ for more informations about this jQuery plugin
  */
 (function($) {

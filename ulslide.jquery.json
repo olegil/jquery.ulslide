@@ -1,0 +1,35 @@
+{
+    "name": "ulslide",
+    "title": "jQuery.ulSlide",
+    "description": "Just another slider (or carousel) that supports «Slide», «Fade», «HTML5 Rotate», «HTML5 Scale» and «Carousel» effects. Flexible, “secure” for layout (do not breaks structure of HTML) and very simple to use.
+
+Any HTML can be used as slide content (not only images). Also the plugin supports pre-loading, lazy-loading and ajax-loading.",
+    "keywords": [
+        "slider",
+        "carousel",
+        "effects",
+        "slide",
+        "fade",
+        "HTML5",
+        "rotate",
+        "scale"
+    ],
+    "version": "1.4.9",
+    "author": {
+        "name": "Yevhen",
+        "url": "http://4coder.info/en/author/"
+    },
+    "licenses": [
+        {
+			"type": "GPLv2",
+			"url": "http://www.example.com/licenses/gpl.html"
+        }
+    ],
+    "bugs": "http://4coder.info/en/code/jquery-plugins/ulslide/",
+    "homepage": "http://4coder.info/en/code/jquery-plugins/ulslide/",
+    "docs": "http://4coder.info/en/code/jquery-plugins/ulslide/",
+    "download": "http://code.jquery.com/#ulslide",
+    "dependencies": {
+        "jquery": ">=1.4"
+    }
+}
