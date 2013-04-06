@@ -15,7 +15,8 @@
     "version": "1.4.9",
     "author": {
         "name": "Yevhen",
-        "url": "http://4coder.info/en/author/"
+		"email" : "evgennniy@gmail.com",
+        "url": "http://4coder.info/en/author/"		
     },
     "licenses": [
         {
@@ -23,10 +24,10 @@
 			"url": "http://www.example.com/licenses/gpl.html"
         }
     ],
-    "bugs": "http://4coder.info/en/code/jquery-plugins/ulslide/",
+    "bugs": "http://4coder.info/en/code/jquery-plugins/ulslide/comments/",
     "homepage": "http://4coder.info/en/code/jquery-plugins/ulslide/",
     "docs": "http://4coder.info/en/code/jquery-plugins/ulslide/",
-    "download": "http://code.jquery.com/#ulslide",
+    "download": "https://github.com/yeeevhen/ulslide/archive/master.zip",
     "dependencies": {
         "jquery": ">=1.4"
     }
