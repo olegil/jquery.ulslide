@@ -1,7 +1,7 @@
 {
     "name": "ulslide",
     "title": "jQuery.ulSlide",
-    "description": "Just another slider (or carousel) that supports «Slide», «Fade», «HTML5 Rotate», «HTML5 Scale» and «Carousel» effects. Flexible, “secure” for layout (do not breaks structure of HTML) and very simple to use.
+    "description": "Just another slider (or carousel) that supports Â«SlideÂ», Â«FadeÂ», Â«HTML5 RotateÂ», Â«HTML5 ScaleÂ» and Â«CarouselÂ» effects. Flexible, â€œsecureâ€ for layout (do not breaks structure of HTML) and very simple to use.
 
 Any HTML can be used as slide content (not only images). Also the plugin supports pre-loading, lazy-loading and ajax-loading.",
     "keywords": [

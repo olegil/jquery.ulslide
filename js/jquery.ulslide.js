@@ -1,7 +1,7 @@
 /**
- * Just another slider (or carousel) that supports «Slide», «Fade», 
- * «HTML5 Rotate», «HTML5 Scale» and «Carousel» effects. Flexible, 
- * “secure” for layout (do not breaks structure of HTML) and very simple to use.
+ * Just another slider (or carousel) that supports В«SlideВ», В«FadeВ», 
+ * В«HTML5 RotateВ», В«HTML5 ScaleВ» and В«CarouselВ» effects. Flexible, 
+ * вЂњsecureвЂќ for layout (do not breaks structure of HTML) and very simple to use.
  * 
  * Any HTML can be used as slide content (not only images). 
  * Also the plugin supports pre-loading, lazy-loading and ajax-loading.
@@ -582,19 +582,19 @@
         thisEl.uslStatusbar = function() {		
 		
 			function isImageLoaded(img) {
-				// Во время события load IE и другие браузеры правильно
-				// определяют состояние картинки через атрибут complete.
-				// Исключение составляют Gecko-based браузеры.
+				// Р’Рѕ РІСЂРµРјСЏ СЃРѕР±С‹С‚РёСЏ load IE Рё РґСЂСѓРіРёРµ Р±СЂР°СѓР·РµСЂС‹ РїСЂР°РІРёР»СЊРЅРѕ
+				// РѕРїСЂРµРґРµР»СЏСЋС‚ СЃРѕСЃС‚РѕСЏРЅРёРµ РєР°СЂС‚РёРЅРєРё С‡РµСЂРµР· Р°С‚СЂРёР±СѓС‚ complete.
+				// РСЃРєР»СЋС‡РµРЅРёРµ СЃРѕСЃС‚Р°РІР»СЏСЋС‚ Gecko-based Р±СЂР°СѓР·РµСЂС‹.
 				if (!img.complete) {
 					return false;
 				}
-				// Тем не менее, у них есть два очень полезных свойства: naturalWidth и naturalHeight.
-				// Они дают истинный размер изображения. Если какртинка еще не загрузилась,
-				// то они должны быть равны нулю.
+				// РўРµРј РЅРµ РјРµРЅРµРµ, Сѓ РЅРёС… РµСЃС‚СЊ РґРІР° РѕС‡РµРЅСЊ РїРѕР»РµР·РЅС‹С… СЃРІРѕР№СЃС‚РІР°: naturalWidth Рё naturalHeight.
+				// РћРЅРё РґР°СЋС‚ РёСЃС‚РёРЅРЅС‹Р№ СЂР°Р·РјРµСЂ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ. Р•СЃР»Рё РєР°РєСЂС‚РёРЅРєР° РµС‰Рµ РЅРµ Р·Р°РіСЂСѓР·РёР»Р°СЃСЊ,
+				// С‚Рѕ РѕРЅРё РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ СЂР°РІРЅС‹ РЅСѓР»СЋ.
 				if (typeof img.naturalWidth !== "undefined" && img.naturalWidth === 0) {
 					return false;
 				}
-				// Картинка загружена.
+				// РљР°СЂС‚РёРЅРєР° Р·Р°РіСЂСѓР¶РµРЅР°.
 				return true;
 			}
 		
