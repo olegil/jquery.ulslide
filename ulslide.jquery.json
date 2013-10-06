@@ -1,18 +1,20 @@
 {
     "name": "ulslide",
     "title": "jQuery.ulSlide",
-    "description": "Just another slider (or carousel) that supports \"Slide\", \"Fade\", \"HTML5 Rotate\", \"HTML5 Scale\" and \"Carousel\" effects. Flexible, \"secure\" for layout (do not breaks structure of HTML) and very simple to use. Any HTML can be used as slide content (not only images). Also the plugin supports pre-loading, lazy-loading and ajax-loading.",
+    "description": "Slider (or carousel) that supports \"Slide\", \"Crossfade\", \"Fade\", \\r\\n\"HTML5 Rotate\", \"HTML5 Scale\" and \"Carousel\" effects. Flexible, secure \\r\\nfor html layout (do not changes structure of HTML) and very simple to use. \\r\\n\\r\\nThe plugin supports Responsive design, images Preloading, Lazy Load and Ajax. \\r\\nAny HTML can be used as slide content (not only images). \\r\\n\\r\\nIf the Mousewheel plugin has been included on the page then \\r\\nthe slider will also respond to the mouse wheel. (Set \"mousewheel\" option as \"true\")",
     "keywords": [
         "slider",
         "carousel",
         "effects",
         "slide",
         "fade",
+        "crossfade",
         "HTML5",
+        "CSS3",
         "rotate",
         "scale"
     ],
-    "version": "1.5.0",
+    "version": "1.5.1",
     "author": {
         "name": "Yevhen",
 		"email" : "evgennniy@gmail.com",

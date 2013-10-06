@@ -1,18 +1,18 @@
 /**
- * Just another slider (or carousel) that supports "Slide", "Fade", 
- * "HTML5 Rotate", "HTML5 Scale" and "Carousel" effects. Flexible, 
- * "secure" for layout (do not breaks structure of HTML) and very simple to use.
+ * Slider (or carousel) that supports "Slide", "Crossfade", "Fade",
+ * "HTML5 Rotate", "HTML5 Scale" and "Carousel" effects. Flexible, secure
+ * for html layout (do not changes structure of HTML) and very simple to use.
  * 
- * Any HTML can be used as slide content (not only images). 
- * Also the plugin supports pre-loading, lazy-loading and ajax-loading.
- * 
- * If the mousewheel plugin has been included on the page then 
- * the slider will also respond to the mouse wheel. 
+ * The plugin supports Responsive design, images Preloading, Lazy Load and Ajax.
+ * Any HTML can be used as slide content (not only images).
+ *
+ * If the Mousewheel plugin has been included on the page then
+ * the slider will also respond to the mouse wheel. (Set "mousewheel" option as "true")
  *
  * @name jQuery ulSlide plugin
  * @license GPL
- * @version 1.4.9
- * @date April 1th, 2013
+ * @version 1.5.1
+ * @date October 7th, 2013
  * @category jQuery plugin
  * @author Yevhen Kotelnytskyi (evgennniy@gmail.com)
  * @copyright (c) 2011 - 2013 Yevhen Kotelnytskyi (http://4coder.info/en/)
@@ -34,39 +34,47 @@
         // Settings
         settings = $.extend({
             effect: {
-                type: 'slide', // slide, fade or carousel (use showCount for carousel)
-                axis: 'x',     // x, y
+                type: 'slide', // slide, fade, crossfade or carousel (use showCount for carousel)
+                axis: 'x',     // x, y, r (r - random)
                 distance: 20   // Distance between frames
             },
             duration: 600,     // Changing duration
             direction: 'f',    // f, b
             autoslide: false,  // Autoscrolling interval (ms)
             current: 0,
-			
+
+            canResize: false,
             width: thisObj.width(),
             height: 'auto',    // pixels or 'auto'
-			
+
             statusbar: true,
-			loadTimeout: 6000, // images loading timeout
+            loader: '',
+            loadClass: 'usl-loading',
+            
+            loadTimeout: 5000, // images loading timeout
             lazyload: false,   // testing
             ajax: false,
-			
+
             mousewheel: false, // Scroll on "mousewheel"
-			
+
             // Selectors:
             pager: false,
             nextButton: false,
             prevButton: false,
             printCurrentTo: false,
-			
-            //framesOnPage: 2, 
+
+            //framesOnPage: 2,
+
             onAnimateStart: function(settings, thisEl){},
             onAnimate: function(settings, thisEl){},
             onAjaxStart: function(settings, thisEl){},
             onAjaxStop: function(settings, thisEl){},
-			
-			debug: false
-			
+
+            beforeResize: function(settings, thisEl){},
+            onResize: function(settings, thisEl){},
+
+            debug: false
+
         },settings);
 
         // Deprecated Options
@@ -78,8 +86,13 @@
         if (typeof settings['bnext']         != 'undefined') settings['nextButton']         = settings['bnext'];
         if (typeof settings['bprev']         != 'undefined') settings['prevButton']         = settings['bprev'];
         // end Deprecated Options
-		
-        if (typeof settings['effect']['distance'] == 'undefined') settings['effect']['distance'] = 20;
+
+        if (settings['canResize'] && settings['height'] == 'auto') 
+            settings['height'] = thisObj.height();
+        
+        if (typeof settings['effect']['distance'] == 'undefined') 
+            settings['effect']['distance'] = 20;
+            
         settings['fwidth'] = settings['width'] + settings['effect']['distance'];
         settings['fheight'] = settings['height'] + settings['effect']['distance'];
         settings['prev'] = settings['current'];
@@ -93,20 +106,18 @@
                     img.removeAttr("src");
                 }
             });
-            /*settings['_lazyloaded'][0] = true;*/
         }
 
-		
-		function carouselGetFramePos(i, current){
-			if (i >= settings['effect']['showCount'] - current) {
-				var l = settings['count'] - settings['effect']['showCount'];
-				var ci = (i + current - settings['effect']['showCount']) - l;
-				return ci;
-			}
-			else return i + current;
-		}
-		
-		// CSS for elements		
+        function carouselGetFramePos(i, current){
+            if (i >= settings['effect']['showCount'] - current) {
+                var l = settings['count'] - settings['effect']['showCount'];
+                var ci = (i + current - settings['effect']['showCount']) - l;
+                return ci;
+            }
+            else return i + current;
+        }
+
+        // CSS for elements
         $('> *', thisObj).each(function(i){
             var liel = $(this);
             liel.addClass('slide-node slide-node-'+i);
@@ -115,8 +126,8 @@
             liel.css("distance", '0');
             liel.css("width", settings['width']);
             liel.css("overflow", "hidden");
-			
-			if (settings['effect']['type'] == 'carousel') {
+
+            if (settings['effect']['type'] == 'carousel') {
                 var ci = carouselGetFramePos(i, settings['current']);
                 if (settings['effect']['axis'] == 'y') {
                     liel.css("top", (ci * settings['fheight']));
@@ -126,62 +137,147 @@
                     liel.css("top", '0');
                     liel.css("left", (ci * settings['fwidth']));
                 }
-			}
-			else {
-				if (i == settings['current']){
-					liel.css("top", '0');
-					liel.css("left", '0');
-				}
-				else{
-					liel.css("top", '0');
-					liel.css("left", -(settings['width'] + settings['effect']['distance']));
-				}
-			}
-        });
-
-		// CSS for container
-        thisObj.css("list-style", "none");
-        thisObj.css("distance", "0");
-        thisObj.css("position", "relative"); 
-        thisObj.css("padding", 0);
-        if (settings['effect']['type'] != 'rotate') 
-			thisObj.css("overflow", "hidden");
-
-		if (settings['effect']['type'] == 'carousel') {
-            if (settings['effect']['axis'] == 'y') {
-                thisObj.css("width", settings['width']);
-                thisObj.css("height", settings['fheight'] * settings['effect']['showCount'] - settings['effect']['distance']);
             }
             else {
-                thisObj.css("width", settings['fwidth'] * settings['effect']['showCount'] - settings['effect']['distance']);
-                thisObj.css("height", settings['height']);
+                if (i == settings['current']){
+                    liel.css("top", '0');
+                    liel.css("left", '0');
+                }
+                else{
+                    liel.css("top", '0');
+                    liel.css("left", -(settings['width'] + settings['effect']['distance']));
+                }
             }
-		}
-		else {
-			thisObj.css("width", settings['width']);
-            
-            if (settings['height'] == 'auto'){
-                thisObj.css("height", $('> *:eq('+settings['current']+')', thisObj).height());
-            }
-            else thisObj.css("height", settings['height']);
-		} 
-        settings['prevHeight'] = settings['height'];
+        });
 
+        // CSS for container
+        thisObj.css("list-style", "none");
+        thisObj.css("distance", "0");
+        thisObj.css("position", "relative");
+        thisObj.css("padding", 0);
+        if (settings['effect']['type'] != 'rotate')
+            thisObj.css("overflow", "hidden");
+        
+        if (! settings['canResize']) {
+            if (settings['effect']['type'] == 'carousel') {
+                if (settings['effect']['axis'] == 'y') {
+                    thisObj.css("width", settings['width']);
+                    thisObj.css("height", settings['fheight'] * settings['effect']['showCount'] - settings['effect']['distance']);
+                }
+                else {
+                    thisObj.css("width", settings['fwidth'] * settings['effect']['showCount'] - settings['effect']['distance']);
+                    thisObj.css("height", settings['height']);
+                }
+            }
+            else {
+                thisObj.css("width", settings['width']);
+
+                if (settings['height'] == 'auto'){
+                    thisObj.css("height", $('> *:eq('+settings['current']+')', thisObj).height());
+                }
+                else thisObj.css("height", settings['height']);
+            }
+            settings['prevHeight'] = settings['height'];
+        }
+
+        function resize(){
+            var size = settings['beforeResize'](settings, thisEl); // event
+
+            if (size && size.width && size.height) {
+                settings['width'] = size.width;
+                settings['height'] = size.height;
+            }
+            else {
+                settings['width'] = thisObj.width();
+                settings['height'] = thisObj.height();
+            }
+
+            //console.log('resize ' + settings['width'] + ' x ' + settings['height']); //*****
+            settings['fwidth'] = settings['width'] + settings['effect']['distance'];
+            settings['fheight'] = settings['height'] + settings['effect']['distance'];
+
+            if (settings['effect']['type'] == 'carousel') {
+                if (settings['effect']['axis'] == 'y') {
+                    thisObj.css("width", settings['width']);
+                    thisObj.css("height", settings['fheight'] * settings['effect']['showCount'] - settings['effect']['distance']);
+                }
+                else {
+                    thisObj.css("width", settings['fwidth'] * settings['effect']['showCount'] - settings['effect']['distance']);
+                    thisObj.css("height", settings['height']);
+                }
+            }
+            else {
+                //thisObj.css("width", settings['width']);
+
+                if (settings['height'] == 'auto'){
+                    thisObj.css("height", $('> *:eq('+settings['current']+')', thisObj).height());
+                    
+                    console.log('resize auto height: ' +  $('> *:eq('+settings['current']+')', thisObj).height()); //*****
+                }
+                //else thisObj.css("height", settings['height']);
+            }
+            settings['prevHeight'] = settings['height'];
+
+            /* elements */
+            $('> *', thisObj).each(function(i){
+                var liel = $(this);
+                liel.addClass('slide-node slide-node-'+i);
+                liel.css("position", 'absolute');
+                liel.css("margin", '0');
+                liel.css("distance", '0');
+                liel.css("width", settings['width']);
+                liel.css("overflow", "hidden");
+                
+                if (settings['effect']['type'] == 'carousel') {
+                    var ci = carouselGetFramePos(i, settings['current']);
+                    if (settings['effect']['axis'] == 'y') {
+                        liel.css("top", (ci * settings['fheight']));
+                        liel.css("left", '0');
+                    }
+                    else {
+                        liel.css("top", '0');
+                        liel.css("left", (ci * settings['fwidth']));
+                    }
+                }
+                else {
+                    if (i == settings['current']){
+                        liel.css("top", '0');
+                        liel.css("left", '0');
+                    }
+                    else{
+                        liel.css("top", '0');
+                        liel.css("left", -(settings['width'] + settings['effect']['distance']));
+                    }
+                    
+                    if (settings['height'] == 'auto'){
+                        liel.css("height", $('> *:eq('+settings['current']+')', thisObj).height());
+                    }
+                    else liel.css("height", settings['height']);
+                }
+            });
+
+            settings['onResize'](settings, thisEl); // event
+        }
+        
         thisEl.getSlide = function getSlide(num) {
             return $('> *:eq('+num+')', thisEl);
         };
-		
+
+        function array_rand(arg) {
+            return arg[Math.floor(Math.random() * arg.length)];
+        }
+
         function next() {
             var c = thisEl.uslCurrent();
             settings['direction'] = 'f';
             if (c + 1 < settings['count']) {
                 thisEl.uslRefresh(c + 1);
             } else {
-				
+
                 thisEl.uslRefresh(0);
-            }          
+            }
         }
-		
+
         function prev() {
             var c = thisEl.uslCurrent();
             settings['direction'] = 'b';
@@ -210,17 +306,18 @@
         };
 
         thisEl.autoslideNext = function(){
-			if (settings['direction'] == 'f') next();
-            else prev();
+            /*if (settings['direction'] == 'f') next();
+            else prev();*/
+            next();
         };
 
         thisEl.initAutoslide = function(){
-			
+
             if (settings['TimeoutID']) clearTimeout(settings['TimeoutID']);
             settings['TimeoutID'] = setTimeout("jQuery('#"+$(thisEl).attr('id')+"')[0].autoslideNext()", settings['autoslide']);
-			
-			if (settings['debug'])
-				console.log('initAutoslide: ' + settings['TimeoutID']);
+
+            if (settings['debug'])
+                console.log('initAutoslide: ' + settings['TimeoutID']);
         };
 
         thisEl.clearAutoslide = function(){
@@ -230,19 +327,19 @@
         };
 
         thisEl.uslRefresh = function(slide_index, fast, callback){
-			if (settings['debug'])
-				console.log('uslRefresh()');
-				
+            if (settings['debug'])
+                console.log('uslRefresh()');
+
             if (! thisEl.ready) {
                 if (settings['debug'])
-					console.log('uslRefresh / ' + settings['id'] + ': ! thisEl.ready');
-					
+                    console.log('uslRefresh / ' + settings['id'] + ': ! thisEl.ready');
+
                 setTimeout("jQuery('#"+$(thisEl).attr('id')+"')[0].uslRefresh()", 400);
                 return;
             }
-			if (settings['LoadTimeoutID']) clearTimeout(settings['LoadTimeoutID']);
+            if (settings['LoadTimeoutID']) clearTimeout(settings['LoadTimeoutID']);
             thisEl.ready = false;
-			
+
             if (typeof(slide_index) != 'undefined') {
                 thisEl.uslCurrent(slide_index);
             }
@@ -253,8 +350,8 @@
             current.css('display', 'block');
 
             function doRefresh() {
-				if (settings['debug'])
-					console.log('doRefresh()');			
+                if (settings['debug'])
+                    console.log('doRefresh()');
 
                 settings['onAnimateStart'](settings, thisEl); // notification
                 //console.log(settings['id'] + ': doRefresh');
@@ -265,9 +362,9 @@
                 }
 
                 function finish_animate() {
-					if (settings['debug'])
-						console.log('finish_animate(): start');
-					
+                    if (settings['debug'])
+                        console.log('finish_animate(): start');
+
                     if (settings['printCurrentTo']) {
                         $(settings['printCurrentTo']).html(settings['current'] + 1);
                     }
@@ -281,11 +378,11 @@
                             'height': thisEl.currentHeight
                         }, 250/*, function() { alert(settings['id'] + ': finish_animate()' + thisEl.currentHeight); }*/);
                     }
-                    
+
                     //settings['prev'] = settings['current'];
-					if (settings['debug'])
-						console.log('finish_animate(): autoslide = ' + settings['autoslide']);
-						
+                    if (settings['debug'])
+                        console.log('finish_animate(): autoslide = ' + settings['autoslide']);
+
                     if (settings['autoslide']) thisEl.initAutoslide();
                     settings['onAnimate'](settings, thisEl); // notification
                     settings['prev'] = settings['current'];
@@ -299,28 +396,39 @@
                     finish_animate();
                     return;
                 }
-								
+
                 if (settings['effect']['type'] == 'slide') {
-                    if (settings['effect']['axis'] == 'x'){
-						if (settings['prev'] != settings['current']){
-							if (settings['direction'] == 'f'){
-								prev.animate({
-									'left': -(settings['width'] + settings['effect']['distance'])
-								}, settings['duration'], settings['easing']);
-								current.css('left', settings['width'] + settings['effect']['distance']);
-							}
-							else{
-								prev.animate({
-									'left': settings['width'] + settings['effect']['distance']
-								}, settings['duration'], settings['easing']);
-								current.css('left', -(settings['width'] + settings['effect']['distance']));
-							}
-						}
-						current.animate({
-							'left': 0
-						}, settings['duration'], settings['easing'], function(){
-							finish_animate();
-						});
+                    
+                    var axis = settings['effect']['axis'];
+                    
+                    // Randomize axis
+                    if (axis == 'r')
+                        axis = array_rand(['x', 'y']); 
+                    
+                    if (axis == 'x') {
+                        if (settings['prev'] != settings['current']){
+                            if (settings['direction'] == 'f'){
+                                prev.animate({
+                                    'left': -(settings['width'] + settings['effect']['distance'])
+                                }, settings['duration'], settings['easing']);
+                                current.css('left', settings['width'] + settings['effect']['distance']);
+                            }
+                            else{
+                                prev.animate({
+                                    'left': settings['width'] + settings['effect']['distance']
+                                }, settings['duration'], settings['easing']);
+                                current.css('left', -(settings['width'] + settings['effect']['distance']));
+                            }
+                        }
+                        
+                        current.css('top', 0);
+                        prev.css('top', 0);
+                        
+                        current.animate({
+                            'left': 0
+                        }, settings['duration'], settings['easing'], function(){
+                            finish_animate();
+                        });
                     }
                     else {
                         if (settings['prev'] != settings['current']){
@@ -341,7 +449,10 @@
                                 current.css('top', settings['prevHeight'] + settings['effect']['distance']);
                             }
                         }
+                        
                         current.css('left', 0);
+                        prev.css('left', 0);
+                        
                         current.animate({
                             'top': 0
                         }, settings['duration'], settings['easing'], function(){
@@ -357,7 +468,7 @@
                     //prev.css('z-index', 1);
                     var duration = settings['duration'];
                     if (typeof fast != 'undefined') duration = 0;
-                    
+
                     prev.fadeOut(duration, function(){
                         prev.css('display', 'none');
                         current.fadeIn(duration, function(){
@@ -365,46 +476,60 @@
                         });
                     });
                 }
+                else if (settings['effect']['type'] == 'crossfade') {
+                    current.css('display', 'none');
+                    //current.css('z-index', 2);
+                    current.css('left', 0);
+                    current.css('top', 0);
+                    //prev.css('z-index', 1);
+                    var duration = settings['duration'];
+                    if (typeof fast != 'undefined') duration = 0;
+
+                    prev.fadeOut(duration, function(){
+                        prev.css('display', 'none');
+                    });
+                    current.fadeIn(duration, function(){
+                        finish_animate();
+                    });
+                }
                 else if (settings['effect']['type'] == 'rotate') {
-					var rotate_pref = settings['direction'] == 'f' ? '-' : '';
-					current.animate({'rotate': rotate_pref + '90deg', 'scale': '0.01', 'opacity': 0.3, 'z-index': 2, 'left': 0, 'top': 0}, 0);
+                    var rotate_pref = settings['direction'] == 'f' ? '-' : '';
+                    current.animate({'rotate': rotate_pref + '90deg', 'scale': '0.01', 'opacity': 0.3, 'z-index': 2, 'left': 0, 'top': 0}, 0);
                     prev.css('z-index', 1);
-                    
-					prev.animate({'opacity': 0}, settings['duration'], settings['easing'], function(){ });
-					current.animate({'rotate': rotate_pref + '360deg', 'scale': '1', 'opacity': 1}, settings['duration'], settings['easing'], function(){
-						finish_animate();
-					});
+
+                    prev.animate({'opacity': 0}, settings['duration'], settings['easing'], function(){ });
+                    current.animate({'rotate': rotate_pref + '360deg', 'scale': '1', 'opacity': 1}, settings['duration'], settings['easing'], function(){
+                        finish_animate();
+                    });
                 }
                 else if (settings['effect']['type'] == 'scale') {
-					if (settings['direction'] == 'f') {
-						var rotate_pref =  '-';
-						var rotate_pref_i =  '';
-					}
-					else {
-						var rotate_pref = '';
-						var rotate_pref_i = '-';
-					}
+                    if (settings['direction'] == 'f') {
+                        var rotate_pref =  '-';
+                        var rotate_pref_i =  '';
+                    }
+                    else {
+                        var rotate_pref = '';
+                        var rotate_pref_i = '-';
+                    }
 
-					current.animate({'scale': '0.05', 'opacity': 0.3, 'z-index': 2, 'left': 0, 'top': 0, 'marginLeft': rotate_pref_i + (settings['fwidth']/2)+'px'}, 0);					
+                    current.animate({'scale': '0.05', 'opacity': 0.3, 'z-index': 2, 'left': 0, 'top': 0, 'marginLeft': rotate_pref_i + (settings['fwidth']/2)+'px'}, 0);
                     prev.css('z-index', 1);
-                    
-					prev.animate({'scale': '0.01', 'opacity': 0, 'marginLeft': rotate_pref + (settings['fwidth']/2)+'px'}, settings['duration'], settings['easing'], function(){ });
 
-					current.animate({'scale': '1', 'opacity': 1, 'marginLeft': '0px'}, settings['duration'], settings['easing'], function(){
-						finish_animate();
-					});
+                    prev.animate({'scale': '0.01', 'opacity': 0, 'marginLeft': rotate_pref + (settings['fwidth']/2)+'px'}, settings['duration'], settings['easing'], function(){ });
+
+                    current.animate({'scale': '1', 'opacity': 1, 'marginLeft': '0px'}, settings['duration'], settings['easing'], function(){
+                        finish_animate();
+                    });
                 }
-				else if (settings['effect']['type'] == 'carousel') {
-					$('> *', thisObj).each(function(i){
-						liel = $(this);
-						var ci = carouselGetFramePos(i, settings['current']);
-						if (settings['direction'] == 'f')
-							 var pi = carouselGetFramePos(i, settings['current'] - 1);
-						else var pi = carouselGetFramePos(i, settings['current'] + 1);
- 
-                        //*****************************************************
-                        
-                        if (settings['effect']['axis'] == 'y') {                        
+                else if (settings['effect']['type'] == 'carousel') {
+                    $('> *', thisObj).each(function(i){
+                        liel = $(this);
+                        var ci = carouselGetFramePos(i, settings['current']);
+                        if (settings['direction'] == 'f')
+                             var pi = carouselGetFramePos(i, settings['current'] - 1);
+                        else var pi = carouselGetFramePos(i, settings['current'] + 1);
+
+                        if (settings['effect']['axis'] == 'y') {
                             if ((settings['direction'] == 'f') && (ci == 0)) {
                                 liel.css('top', (-1 * settings['fheight']));
                                 liel.animate({'top': ci * settings['fheight']}, settings['duration'], settings['easing']);
@@ -453,20 +578,20 @@
                             }
                         }
 
-						setTimeout(function(){
-								finish_animate();
-						}, settings['duration'] + 100);					
-					});
-				}
+                        setTimeout(function(){
+                                finish_animate();
+                        }, settings['duration'] + 100);
+                    });
+                }
             }
-			
+
             if (settings['ajax']) {
                 settings['onAjaxStart'](settings, thisEl); // notification
                 var statusbar_loaded = thisEl.getSlide(settings['current'])[0].usl_ajax_loaded;
 
                 thisEl.uslAjaxLoadSlide(settings['current'], function() {
-					settings['onAjaxStop'](settings, thisEl); // notification
-					doRefresh();
+                    settings['onAjaxStop'](settings, thisEl); // notification
+                    doRefresh();
                 })
             }
             else {
@@ -499,11 +624,11 @@
                     }
                     return;
                 }
-                
+
                 doRefresh();
             }
         };
-		
+
         thisEl.uslAjaxLoadSlide = function(slide_num, callback) {
             var current = thisEl.getSlide(slide_num);
 
@@ -536,7 +661,7 @@
                 return false;
             });
         }
-		
+
         if (settings['prevButton']){
             $(settings['prevButton']).click(function(){
                 prev();
@@ -550,7 +675,7 @@
                 this.usl_navigator_index = index;
                 $(this).addClass('usl-pager-' + index);
             });
-					
+
             pager.click(function(){
                 var c = this.usl_navigator_index;
                 if ((c < settings['count']) && (c != thisEl.uslCurrent())) {
@@ -562,49 +687,52 @@
                 return false;
             });
         }
-		
+
         if (settings['pager']){
             setNavigator(settings['pager']);
         }
         if (settings['navigator2']){
             setNavigator(settings['navigator2']);
         }
-        
+
         function loadingStatus(loading) {
             if (loading) {
                 thisObj.addClass('usl-loading');
+                thisObj.parent().addClass('usl-parent-loading');
+                
+                if (settings['loader']) {
+                    jQuery(settings['loader']).addClass(settings['loadClass']);
+                }
             }
             else {
                 thisObj.removeClass('usl-loading');
+                thisObj.parent().removeClass('usl-parent-loading');
+                
+                if (settings['loader']) {
+                    jQuery(settings['loader']).removeClass(settings['loadClass']);
+                }
             }
         }
-		
-        thisEl.uslStatusbar = function() {		
-		
-			function isImageLoaded(img) {
-				// Во время события load IE и другие браузеры правильно
-				// определяют состояние картинки через атрибут complete.
-				// Исключение составляют Gecko-based браузеры.
-				if (!img.complete) {
-					return false;
-				}
-				// Тем не менее, у них есть два очень полезных свойства: naturalWidth и naturalHeight.
-				// Они дают истинный размер изображения. Если какртинка еще не загрузилась,
-				// то они должны быть равны нулю.
-				if (typeof img.naturalWidth !== "undefined" && img.naturalWidth === 0) {
-					return false;
-				}
-				// Картинка загружена.
-				return true;
-			}
-		
+
+        thisEl.uslStatusbar = function() {
+
+            function isImageLoaded(img) {
+                if (!img.complete) {
+                    return false;
+                }
+                if (typeof img.naturalWidth !== "undefined" && img.naturalWidth === 0) {
+                    return false;
+                }
+                return true;
+            }
+
             if (settings['lazyload']) {
                 var $imgToLoad = $('>li:eq('+settings['current']+') img', thisEl);
             }
             else {
                 var $imgToLoad = $('img', thisEl);
             }
-            
+
             settings['img_count'] = $imgToLoad.length;
             if (settings['img_count']) {
                 loadingStatus(true);
@@ -612,44 +740,44 @@
 
             settings['img_loaded'] = 0;
             $imgToLoad.each(function(){
-							
+
                 if (isImageLoaded(this)) {
                     settings['img_loaded'] ++;
-					if (settings['debug'])
-						console.log($(this).attr('src') + ' loaded'); 
+                    if (settings['debug'])
+                        console.log($(this).attr('src') + ' loaded');
                 }
                 else {
                     $(this).load(function(){
                         settings['img_loaded'] ++;
-						
-						if (settings['debug']) 
-							console.log('Img LOAD / ' + settings['img_loaded'] + ' of ' + settings['img_count']);
-						
+
+                        if (settings['debug'])
+                            console.log('Img LOAD / ' + settings['img_loaded'] + ' of ' + settings['img_count']);
+
                         if (settings['img_loaded'] == settings['img_count']){
                             loadingStatus(false);
                             thisEl.ready = true;
                             thisEl.uslRefresh();
                         }
                     });
-					if (settings['debug'])
-						console.log($(this).attr('src') + ' NOT loaded'); 
+                    if (settings['debug'])
+                        console.log($(this).attr('src') + ' NOT loaded');
                 }
             });
-			
-			if (settings['debug'])
-				console.log('uslStatusbar() / ' + settings['img_loaded'] + ' of ' + settings['img_count']);
+
+            if (settings['debug'])
+                console.log('uslStatusbar() / ' + settings['img_loaded'] + ' of ' + settings['img_count']);
 
             if (settings['img_loaded'] == settings['img_count']){
                 loadingStatus(false);
                 thisEl.ready = true;
                 thisEl.uslRefresh();
             }
-			
-			settings['LoadTimeoutID'] = setTimeout(function(){ 
-											loadingStatus(false);
-											thisEl.ready = true;											
-											thisEl.uslRefresh(); 
-										}, settings['loadTimeout']);
+
+            settings['LoadTimeoutID'] = setTimeout(function(){
+                                            loadingStatus(false);
+                                            thisEl.ready = true;
+                                            thisEl.uslRefresh();
+                                        }, settings['loadTimeout']);
         };
 
         // statusbar
@@ -676,7 +804,13 @@
                     return false;
                 });
         }
-		
+
+        if (settings['canResize']){
+            thisObj.on('resize', resize);
+            jQuery(window).on('resize', resize);
+            resize();            
+        }
+                
         if (! settings['statusbar'] || settings['ajax']) {
             thisEl.ready = true;
             thisEl.uslRefresh();
