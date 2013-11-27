@@ -11,14 +11,276 @@
  *
  * @name jQuery ulSlide plugin
  * @license GPL
- * @version 1.5.1
- * @date October 7th, 2013
+ * @version 1.5.2
+ * @date Nov 26th, 2013
  * @category jQuery plugin
  * @author Yevhen Kotelnytskyi (evgennniy@gmail.com)
  * @copyright (c) 2011 - 2013 Yevhen Kotelnytskyi (http://4coder.info/en/)
  * @example Visit http://4coder.info/en/code/jquery-plugins/ulslide/ for more informations about this jQuery plugin
  */
 (function($) {
+    // --- CSS Hook "uslTransformRotateY" and "uslTransformTranslateZ"
+    function setUslTransform(elem) {
+        var uslTransformRotateY = $.data( elem, 'uslTransformRotateY' );
+        var uslTransformTranslateZ = $.data( elem, 'uslTransformTranslateZ' );
+        
+        var transform = '';
+        if (uslTransformRotateY !== undefined)
+            transform += ' rotateY('+uslTransformRotateY+'deg) ';
+            
+        if (uslTransformTranslateZ !== undefined)
+            transform += ' translateZ('+uslTransformTranslateZ+'px) ';
+
+        $(elem).css({
+                    '-webkit-transform': transform,
+                    'transform': transform
+                });
+    }
+    
+    $.cssHooks.uslTransformRotateY = {
+        set: function(elem, val, unit) {
+            $.data( elem, 'uslTransformRotateY', parseInt(val) );
+            setUslTransform(elem);
+        },
+        get: function(elem, computed) {
+            var uslTransformRotateY = $.data( elem, 'uslTransformRotateY' );
+            var val = uslTransformRotateY ? uslTransformRotateY : 0;
+            return val;
+        }
+    };     
+    
+    $.cssHooks.uslTransformTranslateZ = {
+        set: function(elem, val, unit) {
+            $.data( elem, 'uslTransformTranslateZ', parseInt(val) );
+            setUslTransform(elem);
+        },
+        get: function(elem, computed) {
+            var uslTransformTranslateZ = $.data( elem, 'uslTransformTranslateZ' );
+            var val = uslTransformTranslateZ ? uslTransformTranslateZ : 0;
+            return val;
+        }
+    };   
+    
+    $.fx.step.uslTransformRotateY = function( fx ) {
+        $.cssHooks.uslTransformRotateY.set( fx.elem, fx.now, fx.unit);
+    };    
+    
+    $.fx.step.uslTransformTranslateZ = function( fx ) {
+        $.cssHooks.uslTransformTranslateZ.set( fx.elem, fx.now, fx.unit);
+    };
+    // --- end CSS Hook
+    
+    ulslideEffects = {
+        //-------------------------------------------------------------------------------
+        flip3D: {
+            init: function(elem, settings) {
+                if (settings['debug'])
+                    console.log('ulslideEffects.flip3D.init();'); //***
+                
+                $(elem).css({
+                        'overflow': 'visible',
+                        'transformStyle': 'preserve-3d'
+                    });
+
+                $('> *', elem).each(function(i) {                                    
+                    var styles = {
+                            'uslTransformRotateY': '0deg', 
+                            'transformStyle': 'preserve-3d',
+                            'backface-visibility': 'hidden',
+                            '-webkit-backface-visibility': 'hidden',
+                            'top': '50%',
+                            'left': '50%'
+                        };
+
+                    if (i == settings['current'])
+                        styles.display = 'block';
+                    else styles.display = 'none';
+
+                    $(this).css(styles);
+                });
+            },
+            resize: function(elem, settings) {
+                if (settings['debug'])
+                    console.log('ulslideEffects.flip3D.resize();'); //***
+                
+                $(elem).css({
+                        'perspective': settings['perspective'] + 'px',
+                    });
+
+                $('> *', elem).each(function(i) {                                    
+                    var styles = {
+                            'margin': ('-' + (settings['height']/2) + 'px 0 0' + '-' + (settings['width']/2) + 'px')
+                        };
+                    $(this).css(styles);
+                });
+            },
+            slide: function(elem, settings, $prevElem, $currentElem, callback) {
+                if (settings['debug'])
+                    console.log('ulslideEffects.flip3D.slide();'); //***
+                
+                if (settings['direction'] == 'f') {
+                    var degs = {
+                            prev_start: '0deg', 
+                            prev_finish: 180,                             
+                            current_start: '180deg', 
+                            current_finish: 360
+                        };
+                }
+                else {
+                    var degs = {
+                            prev_start: '360deg', 
+                            prev_finish: 180,                             
+                            current_start: '180deg', 
+                            current_finish: 0
+                        };
+                }
+                
+                $prevElem.css({
+                        uslTransformRotateY: degs.prev_start, 
+                        opacity: 1, 
+                        display: 'block'
+                    });
+                    
+                $currentElem.css({
+                        uslTransformRotateY: degs.current_start, 
+                        opacity: 1, 
+                        display: 'block'
+                    });
+
+                $prevElem.animate({
+                        'uslTransformRotateY': degs.prev_finish, 
+                        'opacity': 0
+                    },{
+                        duration: settings['duration'],
+                        easing: settings['easing']
+                    });
+              
+                $currentElem.animate({
+                        'uslTransformRotateY': degs.current_finish, 
+                        'opacity': 1
+                    },{
+                        duration: settings['duration'],
+                        easing: settings['easing'],
+                        complete: function(){
+                            callback();
+                        }                                   
+                    });
+            }
+        },
+        //-------------------------------------------------------------------------------
+        cube3D: {
+            init: function(elem, settings) {
+                if (settings['debug'])
+                    console.log('ulslideEffects.cube3D.init();'); //***
+
+                $(elem).css({
+                        'transformStyle': 'preserve-3d',
+                        'overflow': 'visible'
+                    });
+
+                $('> *', elem).each(function(i) {                                    
+                    var styles = {
+                            'uslTransformRotateY': '0deg', 
+                            'transformStyle': 'preserve-3d',
+                            'backface-visibility': 'hidden',
+                            '-webkit-backface-visibility': 'hidden',
+                            'top': '50%',
+                            'left': '50%'
+                        };
+
+                    if (i == settings['current'])
+                        styles.display = 'block';
+                    else styles.display = 'none';
+
+                    $(this).css(styles);
+                });
+            },
+            resize: function(elem, settings) {
+                if (settings['debug'])
+                    console.log('ulslideEffects.cube3D.resize();'); //***
+                
+                var scale = (settings['perspective'] - settings['width'] / 2) / settings['perspective'];
+                $(elem).css({
+                        'perspective': settings['perspective'] + 'px',
+                        'transform': 'scale('+scale+')',
+                        '-webkit-transform': 'scale('+scale+')'
+                    });
+
+                $('> *', elem).each(function(i) {                                    
+                    var styles = {
+                            'uslTransformTranslateZ': (settings['width']/2) + 'px',
+                            'margin': ('-' + (settings['height']/2) + 'px 0 0' + '-' + (settings['width']/2) + 'px')
+                        };
+                    $(this).css(styles);
+                });
+            },
+            slide: function(elem, settings, $prevElem, $currentElem, callback) {
+                if (settings['debug'])
+                    console.log('ulslideEffects.cube3D.slide();'); //***
+                
+                if (settings['direction'] == 'f') {
+                    var degs = {
+                            prev_start: '0deg', 
+                            prev_finish: 90,                             
+                            current_start: '-90deg', 
+                            current_finish: 0
+                        };
+                }
+                else {
+                    var degs = {
+                            prev_start: '0deg', 
+                            prev_finish: -90,                             
+                            current_start: '90deg', 
+                            current_finish: 0
+                        };
+                }
+                
+                $prevElem.css({
+                        uslTransformRotateY: degs.prev_start, 
+                        display: 'block'
+                    });
+                    
+                $currentElem.css({
+                        uslTransformRotateY: degs.current_start, 
+                        display: 'block'
+                    });
+
+                $prevElem.animate({
+                        'uslTransformRotateY': degs.prev_finish
+                    },{
+                        duration: settings['duration'],
+                        easing: settings['easing']
+                    });
+              
+                $currentElem.animate({
+                        'uslTransformRotateY': degs.current_finish
+                    },{
+                        duration: settings['duration'],
+                        easing: settings['easing'],
+                        complete: callback                                
+                    });
+            }
+        },
+        //-------------------------------------------------------------------------------
+        test: {
+            init: function(elem, settings) {
+                if (settings['debug'])
+                    console.log('ulslideEffects.test.init();'); //***
+            },
+            resize: function(elem, settings) {
+                if (settings['debug'])
+                    console.log('ulslideEffects.test.resize();'); //***
+            },
+            slide: function(elem, settings, $prevElem, $currentElem, callback) {
+                if (settings['debug'])
+                    console.log('ulslideEffects.test.slide();'); //***
+            }
+        }
+        //-------------------------------------------------------------------------------
+    };
+    
+    
+    
     ulslide_last_id = 0;
 
     $.fn.ulslide = function(settings) {
@@ -34,10 +296,11 @@
         // Settings
         settings = $.extend({
             effect: {
-                type: 'slide', // slide, fade, crossfade or carousel (use showCount for carousel)
+                type: 'slide', // slide, fade, crossfade, flip3D, cube3D or carousel (use showCount for carousel)
                 axis: 'x',     // x, y, r (r - random)
                 distance: 20   // Distance between frames
             },
+            perspective: 1000, // Perspective for 3D effects
             duration: 600,     // Changing duration
             direction: 'f',    // f, b
             autoslide: false,  // Autoscrolling interval (ms)
@@ -103,7 +366,7 @@
                 var img = $(this);
                 img.attr('rel', img.attr('src'));
                 if (i > 0) {
-                    img.removeAttr("src");
+                    img.removeAttr('src');
                 }
             });
         }
@@ -116,66 +379,78 @@
             }
             else return i + current;
         }
-
+        
         // CSS for elements
         $('> *', thisObj).each(function(i){
             var liel = $(this);
             liel.addClass('slide-node slide-node-'+i);
-            liel.css("position", 'absolute');
-            liel.css("margin", '0');
-            liel.css("distance", '0');
-            liel.css("width", settings['width']);
-            liel.css("overflow", "hidden");
+            liel.css('position', 'absolute');
+            liel.css('margin', '0');
+            liel.css('distance', '0');
+            liel.css('width', settings['width']);
+            liel.css('overflow', 'hidden');
 
             if (settings['effect']['type'] == 'carousel') {
                 var ci = carouselGetFramePos(i, settings['current']);
                 if (settings['effect']['axis'] == 'y') {
-                    liel.css("top", (ci * settings['fheight']));
-                    liel.css("left", '0');
+                    liel.css('top', (ci * settings['fheight']));
+                    liel.css('left', '0');
                 }
                 else {
-                    liel.css("top", '0');
-                    liel.css("left", (ci * settings['fwidth']));
+                    liel.css('top', '0');
+                    liel.css('left', (ci * settings['fwidth']));
                 }
             }
             else {
                 if (i == settings['current']){
-                    liel.css("top", '0');
-                    liel.css("left", '0');
+                    liel.css('top', '0');
+                    liel.css('left', '0');
                 }
                 else{
-                    liel.css("top", '0');
-                    liel.css("left", -(settings['width'] + settings['effect']['distance']));
+                    liel.css('top', '0');
+                    liel.css('left', -(settings['width'] + settings['effect']['distance']));
                 }
             }
         });
-
+        
         // CSS for container
-        thisObj.css("list-style", "none");
-        thisObj.css("distance", "0");
-        thisObj.css("position", "relative");
-        thisObj.css("padding", 0);
-        if (settings['effect']['type'] != 'rotate')
-            thisObj.css("overflow", "hidden");
+        thisObj.css('list-style', 'none');
+        thisObj.css('distance', '0');
+        thisObj.css('position', 'relative');
+        thisObj.css('padding', 0);
+        if ((settings['effect']['type'] != 'rotate')) {
+            thisObj.css('overflow', 'hidden');
+        }
+        else {
+            thisObj.css('overflow', 'visible');
+        }
+                
+        // Initialize
+        var effect = ulslideEffects[settings['effect']['type']];
+        if (effect != undefined) {
+            effect.init(thisObj, settings);
+            effect.resize(thisObj, settings);            
+        }
+        // end Initialize
         
         if (! settings['canResize']) {
             if (settings['effect']['type'] == 'carousel') {
                 if (settings['effect']['axis'] == 'y') {
-                    thisObj.css("width", settings['width']);
-                    thisObj.css("height", settings['fheight'] * settings['effect']['showCount'] - settings['effect']['distance']);
+                    thisObj.css('width', settings['width']);
+                    thisObj.css('height', settings['fheight'] * settings['effect']['showCount'] - settings['effect']['distance']);
                 }
                 else {
-                    thisObj.css("width", settings['fwidth'] * settings['effect']['showCount'] - settings['effect']['distance']);
-                    thisObj.css("height", settings['height']);
+                    thisObj.css('width', settings['fwidth'] * settings['effect']['showCount'] - settings['effect']['distance']);
+                    thisObj.css('height', settings['height']);
                 }
             }
             else {
-                thisObj.css("width", settings['width']);
+                thisObj.css('width', settings['width']);
 
                 if (settings['height'] == 'auto'){
-                    thisObj.css("height", $('> *:eq('+settings['current']+')', thisObj).height());
+                    thisObj.css('height', $('> *:eq('+settings['current']+')', thisObj).height());
                 }
-                else thisObj.css("height", settings['height']);
+                else thisObj.css('height', settings['height']);
             }
             settings['prevHeight'] = settings['height'];
         }
@@ -198,23 +473,23 @@
 
             if (settings['effect']['type'] == 'carousel') {
                 if (settings['effect']['axis'] == 'y') {
-                    thisObj.css("width", settings['width']);
-                    thisObj.css("height", settings['fheight'] * settings['effect']['showCount'] - settings['effect']['distance']);
+                    thisObj.css('width', settings['width']);
+                    thisObj.css('height', settings['fheight'] * settings['effect']['showCount'] - settings['effect']['distance']);
                 }
                 else {
-                    thisObj.css("width", settings['fwidth'] * settings['effect']['showCount'] - settings['effect']['distance']);
-                    thisObj.css("height", settings['height']);
+                    thisObj.css('width', settings['fwidth'] * settings['effect']['showCount'] - settings['effect']['distance']);
+                    thisObj.css('height', settings['height']);
                 }
             }
             else {
-                //thisObj.css("width", settings['width']);
+                //thisObj.css('width', settings['width']);
 
                 if (settings['height'] == 'auto'){
-                    thisObj.css("height", $('> *:eq('+settings['current']+')', thisObj).height());
+                    thisObj.css('height', $('> *:eq('+settings['current']+')', thisObj).height());
                     
                     console.log('resize auto height: ' +  $('> *:eq('+settings['current']+')', thisObj).height()); //*****
                 }
-                //else thisObj.css("height", settings['height']);
+                //else thisObj.css('height', settings['height']);
             }
             settings['prevHeight'] = settings['height'];
 
@@ -222,39 +497,45 @@
             $('> *', thisObj).each(function(i){
                 var liel = $(this);
                 liel.addClass('slide-node slide-node-'+i);
-                liel.css("position", 'absolute');
-                liel.css("margin", '0');
-                liel.css("distance", '0');
-                liel.css("width", settings['width']);
-                liel.css("overflow", "hidden");
+                liel.css('position', 'absolute');
+                liel.css('margin', '0');
+                liel.css('distance', '0');
+                liel.css('width', settings['width']);
+                liel.css('overflow', 'hidden');
                 
                 if (settings['effect']['type'] == 'carousel') {
                     var ci = carouselGetFramePos(i, settings['current']);
                     if (settings['effect']['axis'] == 'y') {
-                        liel.css("top", (ci * settings['fheight']));
-                        liel.css("left", '0');
+                        liel.css('top', (ci * settings['fheight']));
+                        liel.css('left', '0');
                     }
                     else {
-                        liel.css("top", '0');
-                        liel.css("left", (ci * settings['fwidth']));
+                        liel.css('top', '0');
+                        liel.css('left', (ci * settings['fwidth']));
                     }
                 }
                 else {
                     if (i == settings['current']){
-                        liel.css("top", '0');
-                        liel.css("left", '0');
+                        liel.css('top', '0');
+                        liel.css('left', '0');
                     }
                     else{
-                        liel.css("top", '0');
-                        liel.css("left", -(settings['width'] + settings['effect']['distance']));
+                        liel.css('top', '0');
+                        liel.css('left', -(settings['width'] + settings['effect']['distance']));
                     }
                     
                     if (settings['height'] == 'auto'){
-                        liel.css("height", $('> *:eq('+settings['current']+')', thisObj).height());
+                        liel.css('height', $('> *:eq('+settings['current']+')', thisObj).height());
                     }
-                    else liel.css("height", settings['height']);
+                    else liel.css('height', settings['height']);
                 }
             });
+            
+            // Resize effect
+            if (effect != undefined) {
+                effect.resize(thisObj, settings);
+            }
+            // end Resize effect
 
             settings['onResize'](settings, thisEl); // event
         }
@@ -583,6 +864,13 @@
                         }, settings['duration'] + 100);
                     });
                 }
+                
+                
+                // Initialize
+                if (effect != undefined) {
+                    effect.slide(thisObj, settings, prev, current, finish_animate);
+                }
+                // end Initialize
             }
 
             if (settings['ajax']) {
@@ -720,7 +1008,7 @@
                 if (!img.complete) {
                     return false;
                 }
-                if (typeof img.naturalWidth !== "undefined" && img.naturalWidth === 0) {
+                if (typeof img.naturalWidth !== 'undefined' && img.naturalWidth === 0) {
                     return false;
                 }
                 return true;

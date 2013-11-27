@@ -6,51 +6,26 @@ More about ulSlide: http://4coder.info/en/code/jquery-plugins/ulslide/
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <meta name="viewport" content="width=device-width">
-        
-        <title>Responsive / jQuery.ulslide plugin</title>        
+        <title>CSS3 3D Cube effect / jQuery.ulslide plugin</title>
 
         <!-- Including jQuery (required) -->
         <script type="text/javascript" src="js/jquery.js"></script>
 
         <!-- Including Mousewheel jQuery plugin (optional) -->
         <script type="text/javascript" src="js/jquery.mousewheel.js"></script>
+        
+        <!-- Including easing jQuery plugin -->
+        <script type="text/javascript" src="js/jquery.easing.js"></script>
 		
         <!-- Including ulslide jQuery plugin (required) -->
-        <script type="text/javascript" src="js/jquery.ulslide.js?v=1.5.2"></script>
+        <script type="text/javascript" src="js/jquery.ulslide.js?v=1.5.2-6"></script>
 
 		<!-- Demo styles (optional) -->
 		<link rel='stylesheet' href='css/style.css?v=2' type='text/css' media='all' />
-        
-        <style>
-        #slide {
-            width: 433px;
-            height: 290px;
-        }
-            
-        @media only screen and (max-width: 448px) {
-            #slide {
-                width: 376px;
-                height: 252px;
-            }
-        }
-        
-        @media only screen and (max-width: 388px) {
-            #slide {
-                width: 216px;
-                height: 145px;
-            }
-        }
-        
-        #slide img {
-            max-width: 100%;
-            height: auto;
-        }
-        </style>
     </head>
     <body>	
-        <h2>Responsive</h2> 
-		<p>Responsive, Horizontal Sliding, Pager</p>
+        <h2>3D Cube effect</h2> 
+		<p>3D Cube effect (HTML5, CSS3), with jQuery easing</p>
 		
         <ul id="slide">
             <li>
@@ -69,31 +44,26 @@ More about ulSlide: http://4coder.info/en/code/jquery-plugins/ulslide/
                 <img src="photos/image-5.jpg" alt="" />
             </li>
         </ul>
-		
-        <ul id="slide-pager">
-            <li><a href="#1">1</a></li>
-            <li><a href="#2">2</a></li>
-            <li><a href="#3">3</a></li>
-            <li><a href="#4">4</a></li>
-            <li><a href="#5">5</a></li>
-        </ul>
+		<br/>
+		<a href="#" id="slide_prev">&laquo; Prev</a> | <a href="#" id="slide_next">Next &raquo;</a>
 		
         <script type="text/javascript">
             $(function() {						
                 $('#slide').ulslide({
                     width: 433,
                     height: 290,
-                    canResize: true,
-					duration: 400,
+					statusbar: true,
 					effect: {
-						//type: 'flip3D', // slide or fade
-						type: 'slide', // slide or fade
-						axis: 'x'      // x, y
+						type: 'cube3D' // slide or fade
 					},
-                    pager: '#slide-pager a'
+                    perspective: 1000,
+                    nextButton: '#slide_next',
+                    prevButton: '#slide_prev',
+                    duration: 700,
+					easing: 'easeInOutCubic' // http://jqueryui.com/resources/demos/effect/easing.html
                 });
             });
         </script>
-
+		
     </body>
 </html>

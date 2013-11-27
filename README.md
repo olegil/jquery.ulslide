@@ -2,7 +2,7 @@ jQuery.ulslide
 =======
 
 jQuery.ulslide plugin. Slider (or carousel) that supports "Slide", "Crossfade", "Fade",
-"HTML5 Rotate", "HTML5 Scale" and "Carousel" effects. Flexible, secure
+HTML5 (CSS3) "3D Flip", "3D Cube", "Rotate", "Scale" and "Carousel" effects. Flexible, secure
 for html layout (do not changes structure of HTML) and very simple to use.
 
 The plugin supports Responsive design, images Preloading, Lazy Load and Ajax.
