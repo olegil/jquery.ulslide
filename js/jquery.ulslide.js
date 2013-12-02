@@ -11,8 +11,8 @@
  *
  * @name jQuery ulSlide plugin
  * @license GPL
- * @version 1.5.2
- * @date Nov 26th, 2013
+ * @version 1.5.4
+ * @date Dec 02th, 2013
  * @category jQuery plugin
  * @author Yevhen Kotelnytskyi (evgennniy@gmail.com)
  * @copyright (c) 2011 - 2013 Yevhen Kotelnytskyi (http://4coder.info/en/)
@@ -68,21 +68,23 @@
     $.fx.step.uslTransformTranslateZ = function( fx ) {
         $.cssHooks.uslTransformTranslateZ.set( fx.elem, fx.now, fx.unit);
     };
-    // --- end CSS Hook
+    // --- end CSS Hook ---
     
+    
+    // --- Effects ---
     ulslideEffects = {
         //-------------------------------------------------------------------------------
         flip3D: {
-            init: function(elem, settings) {
+            init: function($elem, settings) {
                 if (settings['debug'])
                     console.log('ulslideEffects.flip3D.init();'); //***
                 
-                $(elem).css({
+                $elem.css({
                         'overflow': 'visible',
                         'transformStyle': 'preserve-3d'
                     });
 
-                $('> *', elem).each(function(i) {                                    
+                $('> *', $elem[0]).each(function(i) {                                    
                     var styles = {
                             'uslTransformRotateY': '0deg', 
                             'transformStyle': 'preserve-3d',
@@ -99,22 +101,22 @@
                     $(this).css(styles);
                 });
             },
-            resize: function(elem, settings) {
+            resize: function($elem, settings) {
                 if (settings['debug'])
                     console.log('ulslideEffects.flip3D.resize();'); //***
                 
-                $(elem).css({
+                $elem.css({
                         'perspective': settings['perspective'] + 'px',
                     });
 
-                $('> *', elem).each(function(i) {                                    
+                $('> *', $elem[0]).each(function(i) {                                    
                     var styles = {
                             'margin': ('-' + (settings['height']/2) + 'px 0 0' + '-' + (settings['width']/2) + 'px')
                         };
                     $(this).css(styles);
                 });
             },
-            slide: function(elem, settings, $prevElem, $currentElem, callback) {
+            slide: function($elem, settings, $prevElem, $currentElem, callback) {
                 if (settings['debug'])
                     console.log('ulslideEffects.flip3D.slide();'); //***
                 
@@ -169,16 +171,16 @@
         },
         //-------------------------------------------------------------------------------
         cube3D: {
-            init: function(elem, settings) {
+            init: function($elem, settings) {
                 if (settings['debug'])
                     console.log('ulslideEffects.cube3D.init();'); //***
 
-                $(elem).css({
+                $elem.css({
                         'transformStyle': 'preserve-3d',
                         'overflow': 'visible'
                     });
 
-                $('> *', elem).each(function(i) {                                    
+                $('> *', $elem[0]).each(function(i) {                                    
                     var styles = {
                             'uslTransformRotateY': '0deg', 
                             'transformStyle': 'preserve-3d',
@@ -195,18 +197,18 @@
                     $(this).css(styles);
                 });
             },
-            resize: function(elem, settings) {
+            resize: function($elem, settings) {
                 if (settings['debug'])
                     console.log('ulslideEffects.cube3D.resize();'); //***
                 
                 var scale = (settings['perspective'] - settings['width'] / 2) / settings['perspective'];
-                $(elem).css({
+                $elem.css({
                         'perspective': settings['perspective'] + 'px',
                         'transform': 'scale('+scale+')',
                         '-webkit-transform': 'scale('+scale+')'
                     });
 
-                $('> *', elem).each(function(i) {                                    
+                $('> *', $elem[0]).each(function(i) {                                    
                     var styles = {
                             'uslTransformTranslateZ': (settings['width']/2) + 'px',
                             'margin': ('-' + (settings['height']/2) + 'px 0 0' + '-' + (settings['width']/2) + 'px')
@@ -214,7 +216,7 @@
                     $(this).css(styles);
                 });
             },
-            slide: function(elem, settings, $prevElem, $currentElem, callback) {
+            slide: function($elem, settings, $prevElem, $currentElem, callback) {
                 if (settings['debug'])
                     console.log('ulslideEffects.cube3D.slide();'); //***
                 
@@ -262,32 +264,376 @@
             }
         },
         //-------------------------------------------------------------------------------
+        slide: {
+            init: function($elem, settings) {
+                if (settings['debug'])
+                    console.log('ulslideEffects.slide.init();'); //***
+            },
+            resize: function($elem, settings) {
+                if (settings['debug'])
+                    console.log('ulslideEffects.slide.resize();'); //***
+            },
+            slide: function($elem, settings, $prevElem, $currentElem, callback) {
+                if (settings['debug'])
+                    console.log('ulslideEffects.slide.slide();'); //***
+                
+                var axis = settings['effect']['axis'];
+                
+                // Randomize axis
+                if (axis == 'r')
+                    axis = $elem.array_rand(['x', 'y']); 
+                
+                if (axis == 'x') {
+                    if (settings['prev'] != settings['current']){
+                        if (settings['direction'] == 'f'){
+                            $prevElem.animate({
+                                'left': -(settings['width'] + settings['effect']['distance'])
+                            }, settings['duration'], settings['easing']);
+                            $currentElem.css('left', settings['width'] + settings['effect']['distance']);
+                        }
+                        else{
+                            $prevElem.animate({
+                                'left': settings['width'] + settings['effect']['distance']
+                            }, settings['duration'], settings['easing']);
+                            $currentElem.css('left', -(settings['width'] + settings['effect']['distance']));
+                        }
+                    }
+                    
+                    $currentElem.css('top', 0);
+                    $prevElem.css('top', 0);
+                    
+                    $currentElem.animate({
+                        'left': 0
+                    }, settings['duration'], settings['easing'], callback
+                    );
+                }
+                else {
+                    if (settings['prev'] != settings['current']) {
+                        if (settings['direction'] == 'f') {
+                            $prevElem.animate({
+                                'top': $elem[0].currentHeight + settings['effect']['distance']
+                            }, settings['duration'], settings['easing'], function() {
+                                $prevElem.css('left', -(settings['width'] + settings['effect']['distance']));
+                            });
+                            $currentElem.css('top', -(settings['prevHeight'] + settings['effect']['distance']));
+                        }
+                        else {
+                            $prevElem.animate({
+                                'top': -($elem[0].currentHeight + settings['effect']['distance'])
+                            }, settings['duration'], settings['easing'], function(){
+                                $prevElem.css('left', -(settings['width'] + settings['effect']['distance']));
+                            });
+                            $currentElem.css('top', settings['prevHeight'] + settings['effect']['distance']);
+                        }
+                    }
+                    
+                    $currentElem.css('left', 0);
+                    $prevElem.css('left', 0);
+                    
+                    $currentElem.animate({ 'top': 0 }, 
+                                        settings['duration'], 
+                                        settings['easing'], 
+                                        callback);
+                }
+            }
+        },
+        //-------------------------------------------------------------------------------
+        fade: {
+            init: function($elem, settings) {
+                if (settings['debug'])
+                    console.log('ulslideEffects.fade.init();'); //***
+            },
+            resize: function($elem, settings) {
+                if (settings['debug'])
+                    console.log('ulslideEffects.fade.resize();'); //***
+            },
+            slide: function($elem, settings, $prevElem, $currentElem, callback) {
+                if (settings['debug'])
+                    console.log('ulslideEffects.fade.slide();'); //***
+
+                $currentElem.css('display', 'none');
+                $currentElem.css('left', 0);
+                $currentElem.css('top', 0);
+
+                $prevElem.fadeOut(settings['duration'], function(){
+                    $prevElem.css('display', 'none');
+                    $currentElem.fadeIn(settings['duration'], callback);
+                });
+            }
+        },
+        //-------------------------------------------------------------------------------
+        crossfade: {
+            init: function($elem, settings) {
+                if (settings['debug'])
+                    console.log('ulslideEffects.crossfade.init();'); //***
+            },
+            resize: function($elem, settings) {
+                if (settings['debug'])
+                    console.log('ulslideEffects.crossfade.resize();'); //***
+            },
+            slide: function($elem, settings, $prevElem, $currentElem, callback) {
+                if (settings['debug'])
+                    console.log('ulslideEffects.crossfade.slide();'); //***
+                    
+                $currentElem.css('display', 'none');
+                $currentElem.css('left', 0);
+                $currentElem.css('top', 0);
+
+                $prevElem.fadeOut(settings['duration'], function(){
+                    $prevElem.css('display', 'none');
+                });
+                $currentElem.fadeIn(settings['duration'], callback);  
+            }
+        },
+        //-------------------------------------------------------------------------------
+        rotate: {
+            init: function($elem, settings) {
+                if (settings['debug'])
+                    console.log('ulslideEffects.rotate.init();'); //***
+                    
+                $elem.css('overflow', 'visible');
+            },
+            resize: function($elem, settings) {
+                if (settings['debug'])
+                    console.log('ulslideEffects.rotate.resize();'); //***
+            },
+            slide: function($elem, settings, $prevElem, $currentElem, callback) {
+                if (settings['debug'])
+                    console.log('ulslideEffects.rotate.slide();'); //***
+                    
+                var rotate_pref = settings['direction'] == 'f' ? '-' : '';
+                
+                $currentElem.animate({
+                                        'rotate': rotate_pref + '90deg', 
+                                        'scale': '0.01', 
+                                        'opacity': 0.3, 
+                                        'z-index': 2, 
+                                        'left': 0, 
+                                        'top': 0
+                                    }, 0);
+                                    
+                $prevElem.css('z-index', 1);
+
+                $prevElem.animate({
+                                    'opacity': 0
+                                }, 
+                                settings['duration'], 
+                                settings['easing']);
+                                
+                $currentElem.animate({
+                                        'rotate': rotate_pref + '360deg', 
+                                        'scale': '1', 
+                                        'opacity': 1
+                                    }, 
+                                    settings['duration'], 
+                                    settings['easing'], 
+                                    callback);
+            }
+        },
+        //-------------------------------------------------------------------------------
+        scale: {
+            init: function($elem, settings) {
+                if (settings['debug'])
+                    console.log('ulslideEffects.scale.init();'); //***
+            },
+            resize: function($elem, settings) {
+                if (settings['debug'])
+                    console.log('ulslideEffects.scale.resize();'); //***
+            },
+            slide: function($elem, settings, $prevElem, $currentElem, callback) {
+                if (settings['debug'])
+                    console.log('ulslideEffects.scale.slide();'); //***
+                    
+                if (settings['direction'] == 'f') {
+                    var rotate_pref =  '-';
+                    var rotate_pref_i =  '';
+                }
+                else {
+                    var rotate_pref = '';
+                    var rotate_pref_i = '-';
+                }
+
+                $currentElem.animate({
+                                        'scale': '0.05', 
+                                        'opacity': 0.3, 
+                                        'z-index': 2, 
+                                        'left': 0, 
+                                        'top': 0, 
+                                        'marginLeft': rotate_pref_i + (settings['fwidth']/2)+'px'
+                                    }, 0);
+                                    
+                $prevElem.css('z-index', 1);
+
+                $prevElem.animate({
+                                    'scale': '0.01', 
+                                    'opacity': 0, 
+                                    'marginLeft': rotate_pref + (settings['fwidth']/2)+'px'
+                                }, 
+                                settings['duration'], 
+                                settings['easing']);
+
+                $currentElem.animate({
+                                        'scale': '1', 
+                                        'opacity': 1, 
+                                        'marginLeft': '0px'
+                                    }, 
+                                    settings['duration'], 
+                                    settings['easing'], 
+                                    callback);
+            }
+        },
+        //-------------------------------------------------------------------------------
+        carousel: {
+            init: function($elem, settings) {
+                if (settings['debug'])
+                    console.log('ulslideEffects.carousel.init();'); //***
+                
+                $('> *', $elem[0]).each(function(i) {
+                    var ci = $elem.carouselGetFramePos(i, settings['current']);
+                    if (settings['effect']['axis'] == 'y') {
+                        $(this).css({
+                                    'top': (ci * settings['fheight']),
+                                    'left': '0'
+                                });
+                    }
+                    else {
+                        $(this).css({
+                                    'top': '0',
+                                    'left': (ci * settings['fwidth'])
+                                });
+                    }
+                });
+                
+                if (settings['effect']['axis'] == 'y') {
+                    $elem.css('width', settings['width']);
+                    $elem.css('height', settings['fheight'] * settings['effect']['showCount'] - settings['effect']['distance']);
+                }
+                else {
+                    $elem.css('width', settings['fwidth'] * settings['effect']['showCount'] - settings['effect']['distance']);
+                    $elem.css('height', settings['height']);
+                }
+            },
+            resize: function($elem, settings) {
+                if (settings['debug'])
+                    console.log('ulslideEffects.carousel.resize();'); //***
+                    
+                if (settings['effect']['axis'] == 'y') {
+                    $elem.css('width', settings['width']);
+                    $elem.css('height', settings['fheight'] * settings['effect']['showCount'] - settings['effect']['distance']);
+                }
+                else {
+                    $elem.css('width', settings['fwidth'] * settings['effect']['showCount'] - settings['effect']['distance']);
+                    $elem.css('height', settings['height']);
+                }
+                
+                $('> *', $elem[0]).each(function(i) {
+                    var ci = $elem.carouselGetFramePos(i, settings['current']);
+                    if (settings['effect']['axis'] == 'y') {
+                        $(this).css({
+                                    'top': (ci * settings['fheight']),
+                                    'left': '0'
+                                });
+                    }
+                    else {
+                        $(this).css({
+                                    'top': '0',
+                                    'left': (ci * settings['fwidth'])
+                                });
+                    }
+                });
+            },
+            slide: function($elem, settings, $prevElem, $currentElem, callback) {
+                if (settings['debug'])
+                    console.log('ulslideEffects.carousel.slide();'); //***
+                    
+                $('> *', $elem[0]).each(function(i){
+                    liel = $(this);
+                    var ci = $elem.carouselGetFramePos(i, settings['current']);
+                    if (settings['direction'] == 'f')
+                         var pi = $elem.carouselGetFramePos(i, settings['current'] - 1);
+                    else var pi = $elem.carouselGetFramePos(i, settings['current'] + 1);
+
+                    if (settings['effect']['axis'] == 'y') {
+                        if ((settings['direction'] == 'f') && (ci == 0)) {
+                            liel.css('top', (-1 * settings['fheight']));
+                            liel.animate({'top': ci * settings['fheight']}, settings['duration'], settings['easing']);
+                        }
+                        else if ((settings['direction'] == 'f') && (pi + 1 == settings['effect']['showCount'])) {
+                            liel.animate({'top': (settings['effect']['showCount']) * settings['fheight']}, settings['duration'], settings['easing']);
+                        }
+                        else if ((settings['direction'] == 'b') && (pi == 0)) {
+                            liel.animate({'top': -1 * settings['fheight']}, settings['duration'], settings['easing']);
+                        }
+                        else if ((settings['direction'] == 'b') && (ci + 1 == settings['effect']['showCount'])) {
+                            liel.css('top', (ci + 1) * settings['fheight']);
+                            liel.animate({'top': ci * settings['fheight']}, settings['duration'], settings['easing']);
+                        }
+                        else {
+                            if ((ci < settings['effect']['showCount']) && (ci >= 0)) {
+                                liel.animate({'top': ci * settings['fheight']}, settings['duration'], settings['easing']);
+                            }
+                            else {
+                                liel.css('top', (ci * settings['fheight']));
+                            }
+                        }
+                    }
+                    else {
+                        if ((settings['direction'] == 'f') && (ci == 0)) {
+                            liel.css('left', (-1 * settings['fwidth']));
+                            liel.animate({'left': ci * settings['fwidth']}, settings['duration'], settings['easing']);
+                        }
+                        else if ((settings['direction'] == 'f') && (pi + 1 == settings['effect']['showCount'])) {
+                            liel.animate({'left': (settings['effect']['showCount']) * settings['fwidth']}, settings['duration'], settings['easing']);
+                        }
+                        else if ((settings['direction'] == 'b') && (pi == 0)) {
+                            liel.animate({'left': -1 * settings['fwidth']}, settings['duration'], settings['easing']);
+                        }
+                        else if ((settings['direction'] == 'b') && (ci + 1 == settings['effect']['showCount'])) {
+                            liel.css('left', (ci + 1) * settings['fwidth']);
+                            liel.animate({'left': ci * settings['fwidth']}, settings['duration'], settings['easing']);
+                        }
+                        else {
+                            if ((ci < settings['effect']['showCount']) && (ci >= 0)) {
+                                liel.animate({'left': ci * settings['fwidth']}, settings['duration'], settings['easing']);
+                            }
+                            else {
+                                liel.css('left', (ci * settings['fwidth']));
+                            }
+                        }
+                    }
+
+                    setTimeout(callback, settings['duration'] + 100);
+                });
+            }
+        },
+        //-------------------------------------------------------------------------------
         test: {
-            init: function(elem, settings) {
+            init: function($elem, settings) {
                 if (settings['debug'])
                     console.log('ulslideEffects.test.init();'); //***
             },
-            resize: function(elem, settings) {
+            resize: function($elem, settings) {
                 if (settings['debug'])
                     console.log('ulslideEffects.test.resize();'); //***
             },
-            slide: function(elem, settings, $prevElem, $currentElem, callback) {
+            slide: function($elem, settings, $prevElem, $currentElem, callback) {
                 if (settings['debug'])
                     console.log('ulslideEffects.test.slide();'); //***
             }
         }
         //-------------------------------------------------------------------------------
     };
+    // --- end Effects ---
     
     
-    
-    ulslide_last_id = 0;
-
+    // --- jQuery plugin ---
     $.fn.ulslide = function(settings) {
         var thisObj = this;
         if (thisObj.length == 0) return false;
         var thisEl = thisObj[0];
         if (! $(thisEl).attr('id')) {
+            if (ulslide_last_id == undefined)
+                ulslide_last_id = 0;
             ulslide_last_id ++;
             $(thisEl).attr('id', 'ulslide-' + ulslide_last_id);
         }
@@ -371,89 +717,67 @@
             });
         }
 
-        function carouselGetFramePos(i, current){
+        thisObj.carouselGetFramePos = function (i, current) {
             if (i >= settings['effect']['showCount'] - current) {
                 var l = settings['count'] - settings['effect']['showCount'];
                 var ci = (i + current - settings['effect']['showCount']) - l;
                 return ci;
             }
             else return i + current;
-        }
+        };
         
-        // CSS for elements
+        // Initialize elements
         $('> *', thisObj).each(function(i){
             var liel = $(this);
             liel.addClass('slide-node slide-node-'+i);
-            liel.css('position', 'absolute');
-            liel.css('margin', '0');
-            liel.css('distance', '0');
-            liel.css('width', settings['width']);
-            liel.css('overflow', 'hidden');
+            
+            liel.css({
+                    'position': 'absolute',
+                    'margin': '0',
+                    'width': settings['width'],
+                    'overflow': 'hidden'
+                });
 
-            if (settings['effect']['type'] == 'carousel') {
-                var ci = carouselGetFramePos(i, settings['current']);
-                if (settings['effect']['axis'] == 'y') {
-                    liel.css('top', (ci * settings['fheight']));
-                    liel.css('left', '0');
-                }
-                else {
-                    liel.css('top', '0');
-                    liel.css('left', (ci * settings['fwidth']));
-                }
+            if (i == settings['current']) {
+                liel.css({
+                        'top': '0',
+                        'left': '0'
+                    });
             }
             else {
-                if (i == settings['current']){
-                    liel.css('top', '0');
-                    liel.css('left', '0');
-                }
-                else{
-                    liel.css('top', '0');
-                    liel.css('left', -(settings['width'] + settings['effect']['distance']));
-                }
+                liel.css({
+                        'top': '0',
+                        'left': -(settings['width'] + settings['effect']['distance'])
+                    });
             }
         });
         
-        // CSS for container
-        thisObj.css('list-style', 'none');
-        thisObj.css('distance', '0');
-        thisObj.css('position', 'relative');
-        thisObj.css('padding', 0);
-        if ((settings['effect']['type'] != 'rotate')) {
-            thisObj.css('overflow', 'hidden');
+        // Initialize container
+        thisObj.css({
+                    'list-style': 'none',
+                    'position': 'relative',
+                    'padding': 0,
+                    'overflow': 'hidden'
+                });
+
+        if (! settings['canResize']) {
+            thisObj.css('width', settings['width']);
+
+            if (settings['height'] == 'auto'){
+                thisObj.css('height', $('> *:eq('+settings['current']+')', thisObj).height());
+            }
+            else thisObj.css('height', settings['height']);
+
+            settings['prevHeight'] = settings['height'];
         }
-        else {
-            thisObj.css('overflow', 'visible');
-        }
-                
-        // Initialize
+
+        // Initialize effect
         var effect = ulslideEffects[settings['effect']['type']];
         if (effect != undefined) {
             effect.init(thisObj, settings);
             effect.resize(thisObj, settings);            
         }
         // end Initialize
-        
-        if (! settings['canResize']) {
-            if (settings['effect']['type'] == 'carousel') {
-                if (settings['effect']['axis'] == 'y') {
-                    thisObj.css('width', settings['width']);
-                    thisObj.css('height', settings['fheight'] * settings['effect']['showCount'] - settings['effect']['distance']);
-                }
-                else {
-                    thisObj.css('width', settings['fwidth'] * settings['effect']['showCount'] - settings['effect']['distance']);
-                    thisObj.css('height', settings['height']);
-                }
-            }
-            else {
-                thisObj.css('width', settings['width']);
-
-                if (settings['height'] == 'auto'){
-                    thisObj.css('height', $('> *:eq('+settings['current']+')', thisObj).height());
-                }
-                else thisObj.css('height', settings['height']);
-            }
-            settings['prevHeight'] = settings['height'];
-        }
 
         function resize(){
             var size = settings['beforeResize'](settings, thisEl); // event
@@ -471,26 +795,16 @@
             settings['fwidth'] = settings['width'] + settings['effect']['distance'];
             settings['fheight'] = settings['height'] + settings['effect']['distance'];
 
-            if (settings['effect']['type'] == 'carousel') {
-                if (settings['effect']['axis'] == 'y') {
-                    thisObj.css('width', settings['width']);
-                    thisObj.css('height', settings['fheight'] * settings['effect']['showCount'] - settings['effect']['distance']);
-                }
-                else {
-                    thisObj.css('width', settings['fwidth'] * settings['effect']['showCount'] - settings['effect']['distance']);
-                    thisObj.css('height', settings['height']);
-                }
-            }
-            else {
-                //thisObj.css('width', settings['width']);
 
-                if (settings['height'] == 'auto'){
-                    thisObj.css('height', $('> *:eq('+settings['current']+')', thisObj).height());
-                    
-                    console.log('resize auto height: ' +  $('> *:eq('+settings['current']+')', thisObj).height()); //*****
-                }
-                //else thisObj.css('height', settings['height']);
+            //thisObj.css('width', settings['width']);
+
+            if (settings['height'] == 'auto'){
+                thisObj.css('height', $('> *:eq('+settings['current']+')', thisObj).height());
+                
+                console.log('resize auto height: ' +  $('> *:eq('+settings['current']+')', thisObj).height()); //*****
             }
+            //else thisObj.css('height', settings['height']);
+
             settings['prevHeight'] = settings['height'];
 
             /* elements */
@@ -503,18 +817,7 @@
                 liel.css('width', settings['width']);
                 liel.css('overflow', 'hidden');
                 
-                if (settings['effect']['type'] == 'carousel') {
-                    var ci = carouselGetFramePos(i, settings['current']);
-                    if (settings['effect']['axis'] == 'y') {
-                        liel.css('top', (ci * settings['fheight']));
-                        liel.css('left', '0');
-                    }
-                    else {
-                        liel.css('top', '0');
-                        liel.css('left', (ci * settings['fwidth']));
-                    }
-                }
-                else {
+                if (settings['effect']['type'] != 'carousel') {
                     if (i == settings['current']){
                         liel.css('top', '0');
                         liel.css('left', '0');
@@ -544,9 +847,9 @@
             return $('> *:eq('+num+')', thisEl);
         };
 
-        function array_rand(arg) {
+        thisEl.array_rand = function(arg) {
             return arg[Math.floor(Math.random() * arg.length)];
-        }
+        };
 
         function next() {
             var c = thisEl.uslCurrent();
@@ -678,199 +981,10 @@
                     return;
                 }
 
-                if (settings['effect']['type'] == 'slide') {
-                    
-                    var axis = settings['effect']['axis'];
-                    
-                    // Randomize axis
-                    if (axis == 'r')
-                        axis = array_rand(['x', 'y']); 
-                    
-                    if (axis == 'x') {
-                        if (settings['prev'] != settings['current']){
-                            if (settings['direction'] == 'f'){
-                                prev.animate({
-                                    'left': -(settings['width'] + settings['effect']['distance'])
-                                }, settings['duration'], settings['easing']);
-                                current.css('left', settings['width'] + settings['effect']['distance']);
-                            }
-                            else{
-                                prev.animate({
-                                    'left': settings['width'] + settings['effect']['distance']
-                                }, settings['duration'], settings['easing']);
-                                current.css('left', -(settings['width'] + settings['effect']['distance']));
-                            }
-                        }
-                        
-                        current.css('top', 0);
-                        prev.css('top', 0);
-                        
-                        current.animate({
-                            'left': 0
-                        }, settings['duration'], settings['easing'], function(){
-                            finish_animate();
-                        });
-                    }
-                    else {
-                        if (settings['prev'] != settings['current']){
-                            if (settings['direction'] == 'f'){
-                                prev.animate({
-                                    'top': thisEl.currentHeight + settings['effect']['distance']
-                                }, settings['duration'], settings['easing'], function(){
-                                    prev.css('left', -(settings['width'] + settings['effect']['distance']));
-                                });
-                                current.css('top', -(settings['prevHeight'] + settings['effect']['distance']));
-                            }
-                            else{
-                                prev.animate({
-                                    'top': -(thisEl.currentHeight + settings['effect']['distance'])
-                                }, settings['duration'], settings['easing'], function(){
-                                    prev.css('left', -(settings['width'] + settings['effect']['distance']));
-                                });
-                                current.css('top', settings['prevHeight'] + settings['effect']['distance']);
-                            }
-                        }
-                        
-                        current.css('left', 0);
-                        prev.css('left', 0);
-                        
-                        current.animate({
-                            'top': 0
-                        }, settings['duration'], settings['easing'], function(){
-                            finish_animate();
-                        });
-                    }
-                }
-                else if (settings['effect']['type'] == 'fade') {
-                    current.css('display', 'none');
-                    //current.css('z-index', 2);
-                    current.css('left', 0);
-                    current.css('top', 0);
-                    //prev.css('z-index', 1);
-                    var duration = settings['duration'];
-                    if (typeof fast != 'undefined') duration = 0;
-
-                    prev.fadeOut(duration, function(){
-                        prev.css('display', 'none');
-                        current.fadeIn(duration, function(){
-                            finish_animate();
-                        });
-                    });
-                }
-                else if (settings['effect']['type'] == 'crossfade') {
-                    current.css('display', 'none');
-                    //current.css('z-index', 2);
-                    current.css('left', 0);
-                    current.css('top', 0);
-                    //prev.css('z-index', 1);
-                    var duration = settings['duration'];
-                    if (typeof fast != 'undefined') duration = 0;
-
-                    prev.fadeOut(duration, function(){
-                        prev.css('display', 'none');
-                    });
-                    current.fadeIn(duration, function(){
-                        finish_animate();
-                    });
-                }
-                else if (settings['effect']['type'] == 'rotate') {
-                    var rotate_pref = settings['direction'] == 'f' ? '-' : '';
-                    current.animate({'rotate': rotate_pref + '90deg', 'scale': '0.01', 'opacity': 0.3, 'z-index': 2, 'left': 0, 'top': 0}, 0);
-                    prev.css('z-index', 1);
-
-                    prev.animate({'opacity': 0}, settings['duration'], settings['easing'], function(){ });
-                    current.animate({'rotate': rotate_pref + '360deg', 'scale': '1', 'opacity': 1}, settings['duration'], settings['easing'], function(){
-                        finish_animate();
-                    });
-                }
-                else if (settings['effect']['type'] == 'scale') {
-                    if (settings['direction'] == 'f') {
-                        var rotate_pref =  '-';
-                        var rotate_pref_i =  '';
-                    }
-                    else {
-                        var rotate_pref = '';
-                        var rotate_pref_i = '-';
-                    }
-
-                    current.animate({'scale': '0.05', 'opacity': 0.3, 'z-index': 2, 'left': 0, 'top': 0, 'marginLeft': rotate_pref_i + (settings['fwidth']/2)+'px'}, 0);
-                    prev.css('z-index', 1);
-
-                    prev.animate({'scale': '0.01', 'opacity': 0, 'marginLeft': rotate_pref + (settings['fwidth']/2)+'px'}, settings['duration'], settings['easing'], function(){ });
-
-                    current.animate({'scale': '1', 'opacity': 1, 'marginLeft': '0px'}, settings['duration'], settings['easing'], function(){
-                        finish_animate();
-                    });
-                }
-                else if (settings['effect']['type'] == 'carousel') {
-                    $('> *', thisObj).each(function(i){
-                        liel = $(this);
-                        var ci = carouselGetFramePos(i, settings['current']);
-                        if (settings['direction'] == 'f')
-                             var pi = carouselGetFramePos(i, settings['current'] - 1);
-                        else var pi = carouselGetFramePos(i, settings['current'] + 1);
-
-                        if (settings['effect']['axis'] == 'y') {
-                            if ((settings['direction'] == 'f') && (ci == 0)) {
-                                liel.css('top', (-1 * settings['fheight']));
-                                liel.animate({'top': ci * settings['fheight']}, settings['duration'], settings['easing']);
-                            }
-                            else if ((settings['direction'] == 'f') && (pi + 1 == settings['effect']['showCount'])) {
-                                liel.animate({'top': (settings['effect']['showCount']) * settings['fheight']}, settings['duration'], settings['easing']);
-                            }
-                            else if ((settings['direction'] == 'b') && (pi == 0)) {
-                                liel.animate({'top': -1 * settings['fheight']}, settings['duration'], settings['easing']);
-                            }
-                            else if ((settings['direction'] == 'b') && (ci + 1 == settings['effect']['showCount'])) {
-                                liel.css('top', (ci + 1) * settings['fheight']);
-                                liel.animate({'top': ci * settings['fheight']}, settings['duration'], settings['easing']);
-                            }
-                            else {
-                                if ((ci < settings['effect']['showCount']) && (ci >= 0)) {
-                                    liel.animate({'top': ci * settings['fheight']}, settings['duration'], settings['easing']);
-                                }
-                                else {
-                                    liel.css('top', (ci * settings['fheight']));
-                                }
-                            }
-                        }
-                        else {
-                            if ((settings['direction'] == 'f') && (ci == 0)) {
-                                liel.css('left', (-1 * settings['fwidth']));
-                                liel.animate({'left': ci * settings['fwidth']}, settings['duration'], settings['easing']);
-                            }
-                            else if ((settings['direction'] == 'f') && (pi + 1 == settings['effect']['showCount'])) {
-                                liel.animate({'left': (settings['effect']['showCount']) * settings['fwidth']}, settings['duration'], settings['easing']);
-                            }
-                            else if ((settings['direction'] == 'b') && (pi == 0)) {
-                                liel.animate({'left': -1 * settings['fwidth']}, settings['duration'], settings['easing']);
-                            }
-                            else if ((settings['direction'] == 'b') && (ci + 1 == settings['effect']['showCount'])) {
-                                liel.css('left', (ci + 1) * settings['fwidth']);
-                                liel.animate({'left': ci * settings['fwidth']}, settings['duration'], settings['easing']);
-                            }
-                            else {
-                                if ((ci < settings['effect']['showCount']) && (ci >= 0)) {
-                                    liel.animate({'left': ci * settings['fwidth']}, settings['duration'], settings['easing']);
-                                }
-                                else {
-                                    liel.css('left', (ci * settings['fwidth']));
-                                }
-                            }
-                        }
-
-                        setTimeout(function(){
-                                finish_animate();
-                        }, settings['duration'] + 100);
-                    });
-                }
-                
-                
-                // Initialize
+                // Call effect
                 if (effect != undefined) {
                     effect.slide(thisObj, settings, prev, current, finish_animate);
                 }
-                // end Initialize
             }
 
             if (settings['ajax']) {
@@ -1105,3 +1219,4 @@
         }
     };
 })(jQuery); 
+// --- end jQuery plugin ---
