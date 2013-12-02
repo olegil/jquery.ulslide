@@ -11,7 +11,7 @@
  *
  * @name jQuery ulSlide plugin
  * @license GPL
- * @version 1.5.4
+ * @version 1.5.5
  * @date Dec 02th, 2013
  * @category jQuery plugin
  * @author Yevhen Kotelnytskyi (evgennniy@gmail.com)
